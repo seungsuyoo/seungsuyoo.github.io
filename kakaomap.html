@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+
+  <body>
+    <div
+      id="wrap"
+      style="
+        border: 0px solid;
+        width: 100%;
+        height: 100%;
+        margin: 5px 0;
+        position: relative;
+      "
+    ></div>
+
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    <script>
+      var element_wrap = document.getElementById('wrap');
+
+      function foldDaumPostcode() {
+        element_wrap.style.display = 'none';
+      }
+
+      var currentScroll = Math.max(
+        document.body.scrollTop,
+        document.documentElement.scrollTop
+      );
+      new daum.Postcode({
+        oncomplete: function (data) {
+          messageHandler.postMessage(JSON.stringify(data));
+
+          var addr = '';
+          var extraAddr = '';
+
+          if (data.userSelectedType === 'R') {
+            addr = data.roadAddress;
+          } else {
+            addr = data.jibunAddress;
+          }
+
+          if (data.userSelectedType === 'R') {
+            if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+              extraAddr += data.bname;
+            }
+            if (data.buildingName !== '' && data.apartment === 'Y') {
+              extraAddr +=
+                extraAddr !== '' ? ', ' + data.buildingName : data.buildingName;
+            }
+            if (extraAddr !== '') {
+              extraAddr = ' (' + extraAddr + ')';
+            }
+          }
+          element_wrap.style.display = 'none';
+
+          document.body.scrollTop = currentScroll;
+        },
+        onresize: function (size) {
+          element_wrap.style.height = size.height + 'px';
+        },
+        width: '100%',
+        height: '100%',
+      }).embed(element_wrap);
+    </script>
+  </body>
+</html>
